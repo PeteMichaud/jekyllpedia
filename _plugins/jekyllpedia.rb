@@ -8,28 +8,25 @@ module Jekyll
   class Jekyllpedia < Transformer
 
     WIKI_REGEX = /\[\[(?<title>[^\]]+)\]\]/i
-
-    def initialize(context)
-      @context = context
-      @site = @context.registers[:site]
+    DIR_DELIMIT = /\A[\/]+|[\/]+\Z/
+    def dir_regex(d)
+      /(?:\A|\/)#{d}(?:\/|\Z)/i
     end
 
-    def matches(file_with_path)
+    def initialize(context)
+      default_opts = {
+          extensions: nil,
+          directories: nil,
+          #generate_missing: false
+      }
 
-      # file_with_path => "/path/to/file-name.md"
+      @context = context
+      @site = @context.registers[:site]
+      @config = default_opts.merge(@context.config[:wiki])
+    end
 
-      # maybe check the extension, like a converter
-
-      # or compare the filepath with config options
-      # if you want to limit the transformation to
-      # certain directories
-
-      # you could even search the file itself for
-      # certain keywords or front matter
-
-      # in this case, I'm just going to convert all
-
-      true
+    def matches(page)
+      matches_extension(page.ext) && matches_directory(page.path)
     end
 
     def transform(content)
@@ -51,5 +48,19 @@ module Jekyll
       "<a href='#{path}'>#{title}</a>"
     end
 
+    def matches_extension(ext)
+        (@config[:extensions] || [ext]).include?(ext)
+    end
+
+    def matches_directory(file_path)
+      dir = File.dirname(file_path)
+      (@config[:directories] || [dir_strip(dir)]).select do |d|
+        dir =~ dir_regex(d)
+      end.size > 0
+    end
+
+    def dir_strip(dir)
+      dir.gsub(DIR_DELIMIT, '')
+    end
   end
 end
