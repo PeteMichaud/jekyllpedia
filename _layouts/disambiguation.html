@@ -1,0 +1,13 @@
+---
+layout: default
+---
+
+<h2>{{ title }}</h2>
+
+There is more than one page with the same title:
+
+<ul class="posts">
+    {% for page in pages %}
+    <li><a href="{{ page.url }}">{{ page.title }} ({{ page.url }})</a></li>
+    {% endfor %}
+</ul>
