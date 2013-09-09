@@ -10,7 +10,7 @@ module Jekyll
 
   class Jekyllpedia < Transformer
 
-    WIKI_REGEX = /\[\[(?<title>[^\]]+)\]\]/i
+    WIKI_REGEX = /\[\[(?<title>[^\]\|]+)\|?(?<anchor>[^\]\|]+)?\]\]/i
     DIR_DELIMIT = /\A[\/]+|[\/]+\Z/
     def dir_regex(d)
       /(?:\A|\/)#{d}(?:\/|\Z)/i
@@ -34,8 +34,9 @@ module Jekyll
     def transform(content)
       content.gsub WIKI_REGEX do |_|
         title = $~[:title]
+        anchor = $~[:anchor] || title
         matching_pages = get_page_from_title(title)
-        render_anchor(title, matching_pages)
+        render_anchor(anchor, matching_pages)
       end
     end
 
