@@ -3,6 +3,9 @@
 # Plugin Source: http://github.com/PeteMichaud/jekyllpedia
 # Plugin License: MIT
 
+require 'lib/missing_page'
+require 'lib/disambiguation_page'
+
 module Jekyll
 
   class Jekyllpedia < Transformer
@@ -17,7 +20,6 @@ module Jekyll
       default_opts = {
           extensions: nil,
           directories: nil,
-          #generate_missing: false
       }
 
       @context = context
@@ -32,20 +34,41 @@ module Jekyll
     def transform(content)
       content.gsub WIKI_REGEX do |_|
         title = $~[:title]
-        path = get_path_from_title(title)
-        render_anchor(title, path)
+        matching_pages = get_page_from_title(title)
+        render_anchor(title, matching_pages)
       end
     end
 
     private
 
-    def get_path_from_title(title)
+    def get_page_from_title(title)
       @site.pages.select { |page| page.name == title }
     end
 
-    def render_anchor(title, path)
+    def render_anchor(title, pages)
+      case pages.size
+        when 1
+          "<a href='#{pages.first.url}'>#{title}</a>"
+        when 0
+          "<a href='#{generate_missing_page(title)}'>#{title}</a>"
+        else
+          "<a href='#{generate_page(pages)}'>#{title}</a>"
+      end
       return "#{title}[?]" unless path.is_a? String
       "<a href='#{path}'>#{title}</a>"
+    end
+
+    def generate_missing_page(title)
+      missing_page = MissingPage.new(site, site.source, title)
+      @site.pages << missing_page
+      puts "Missing Page: [#{title}](#{missing_page.url})"
+      missing_page.url
+    end
+
+    def generate_disambiguation_page(pages)
+      dis_page = DisambiguationPage.new(site, site.source, pages)
+      @site.pages << dis_page
+      dis_page.url
     end
 
     def matches_extension(ext)
