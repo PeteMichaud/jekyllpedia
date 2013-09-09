@@ -1,13 +1,15 @@
 Jekyllpedia
 ===========
 
-Wiki style links for Jekyll:
+Wiki style links for Jekyll.
+
+## Basic Usage
 
 `[[Page Title]]` => `<a href="path/to/page.html">Page Title</a>`
 
 `[[Page Title|New Anchor Text]]` => `<a href="path/to/page.html">New Anchor Text</a>`
 
-##Missing Pages
+## Missing Pages
 
 `[[Missing Page Title]]` => `<a href="missing/missing-page-title.html">Missing Page Title</a>`
 
